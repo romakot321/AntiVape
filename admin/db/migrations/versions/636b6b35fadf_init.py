@@ -1,8 +1,8 @@
 """init
 
-Revision ID: fcc8c7266681
+Revision ID: 636b6b35fadf
 Revises: 
-Create Date: 2024-08-03 21:00:48.463847
+Create Date: 2024-08-04 01:05:58.426510
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'fcc8c7266681'
+revision = '636b6b35fadf'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -73,7 +73,7 @@ def upgrade() -> None:
     op.create_table('sensor_datas',
     sa.Column('co2', sa.Integer(), nullable=False),
     sa.Column('tvoc', sa.Integer(), nullable=False),
-    sa.Column('batteryCharge', sa.Integer(), nullable=False),
+    sa.Column('battery_charge', sa.Integer(), nullable=False),
     sa.Column('sensor_guid', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),

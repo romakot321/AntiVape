@@ -3,8 +3,10 @@ from fastapi import status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi_utils.tasks import repeat_every
 from pydantic_settings import BaseSettings
 from loguru import logger
+from sensor.services.admin import AdminAPIService
 
 
 class ProjectSettings(BaseSettings):
@@ -33,12 +35,12 @@ def register_cors(application):
     )
 
 
-def init_web_application():
+def init_web_application(admin_app: FastAPI):
     project_settings = ProjectSettings()
     application = FastAPI(
-        openapi_url='/api/openapi.json',
-        docs_url='/api/docs',
-        redoc_url='/api/redoc'
+        openapi_url='/openapi.json',
+        docs_url='/docs',
+        redoc_url='/redoc'
     )
 
     if project_settings.LOCAL_MODE:
@@ -49,12 +51,11 @@ def init_web_application():
 
     application.include_router(sensor_router)
 
+    @repeat_every(seconds=60 * 30, raise_exceptions=True)
+    async def transfer_task():
+        await AdminAPIService.transfer_sensors_data()
+
+    admin_app.add_event_handler("startup", transfer_task)
+
     return application
 
-
-def run() -> FastAPI:
-    application = init_web_application()
-    return application
-
-
-fastapi_app = run()

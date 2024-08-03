@@ -63,7 +63,7 @@ class Sensor(OwnableObjectMixin, Base):
 class SensorData(BaseMixin, Base):
     co2: M[int]
     tvoc: M[int]
-    batteryCharge: M[int]
+    battery_charge: M[int]
     sensor_guid: M[str] = column(ForeignKey('sensors.guid'))
 
     sensor: M['Sensor'] = relationship(back_populates='data', lazy='selectin', cascade='all, delete')

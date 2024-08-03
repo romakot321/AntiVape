@@ -1,6 +1,5 @@
 from pydantic_settings import BaseSettings
-from redis.asyncio import Redis, ConnectionPool
-import aioredis
+from redis.asyncio import ConnectionPool, Redis
 
 
 class Settings(BaseSettings):
@@ -10,9 +9,9 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-pool = aioredis.ConnectionPool.from_url(f'redis://{settings.redis_host}:{settings.redis_port}/{settings.redis_db}', max_connections=20)
+pool = ConnectionPool.from_url(f'redis://{settings.redis_host}:{settings.redis_port}/{settings.redis_db}', max_connections=20)
 
 
 def get_session():
-    session = aioredis.Redis(connection_pool=pool)
+    session = Redis(connection_pool=pool)
     yield session

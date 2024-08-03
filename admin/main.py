@@ -55,6 +55,10 @@ def init_web_application():
     application.include_router(room_router)
     application.include_router(sensor_router)
 
+    from sensor.main import init_web_application as init_sensor_app
+
+    application.mount('/sensor', init_sensor_app(application))
+
     return application
 
 

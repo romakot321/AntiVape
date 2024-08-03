@@ -10,8 +10,8 @@ class SensorService:
     def __init__(self, repository: SensorRepository = Depends()):
         self.repository = repository
 
-    async def store(self, raw_data: str):
-        data = SensorDataSchema(data=raw_data)
-        await self.repository.store(received_at=dt.datetime.now(), **data.model_dump())
+    async def store(self, data: SensorDataSchema):
+        dumped_data = json.dumps(data.model_dump())
+        await self.repository.store(received_at=dt.datetime.now(), data=dumped_data, guid=data.guid)
 
 

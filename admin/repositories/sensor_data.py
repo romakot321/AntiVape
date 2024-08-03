@@ -6,8 +6,8 @@ from admin.db.tables import SensorData
 class SensorDataRepository(BaseRepository):
     base_table = SensorData
 
-    async def create(self, model: SensorData) -> SensorData:
-        return await self._create(model)
+    async def create(self, model: SensorData, do_commit: bool = True) -> SensorData:
+        return await self._create(model, do_commit=do_commit)
 
     async def get_one(self, sensor_data_id: int) -> SensorData:
         filters = {k: v for k, v in (('id', sensor_data_id),) if v is not None}
