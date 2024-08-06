@@ -1,4 +1,4 @@
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, computed_field, ConfigDict
 import json
 import datetime as dt
 
@@ -21,3 +21,5 @@ class SensorDataSchema(BaseModel):
             tvoc=data['tvoc'],
             battery_charge=data['battery_charge']
         )
+
+    model_config = ConfigDict(from_attributes=True)

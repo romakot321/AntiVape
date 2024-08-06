@@ -30,4 +30,5 @@ class SensorShortSchema(BaseModel):
 
 class SensorFiltersSchema(BaseFiltersSchema):
     room_id: int | None = None
+    guid: str | None = None
 

@@ -1,6 +1,8 @@
 from pydantic import BaseModel, ConfigDict
+import datetime as dt
 
 from admin.schemas.sensor import SensorShortSchema
+from admin.schemas.sensor_data import SensorDataSchema
 from .base import BaseFiltersSchema
 
 
@@ -33,4 +35,13 @@ class RoomFiltersSchema(BaseFiltersSchema):
 
 class RoomUpdateSchema(BaseModel):
     name: str | None = None
+
+
+class RoomStatisticFiltersSchema(BaseModel):
+    from_datetime: dt.datetime | None = None
+    to_datetime: dt.datetime | None = None
+
+
+class RoomStatisticGetSchema(BaseModel):
+    data: list[SensorDataSchema]
 

@@ -136,6 +136,18 @@ class BaseRepository[Table: BaseTable]:
                 query = query.filter_by(**{key: value})
         return query
 
+    def _like_filter(self, **kwargs) -> Select:
+        query = select(self.base_table)
+        return self._query_like_filter(query, **kwargs)
+
+    def _query_like_filter(self, query, **kwargs):
+        for key, value in kwargs.items():
+            if value is None:
+                continue
+            filter_ = '%{}%'.format(value)
+            query = query.filter(getattr(self.base_table, key).like(filter_))
+        return query
+
     async def commit(self):
         if self._commit_and_close:
             try:

@@ -1,6 +1,8 @@
-from .base import BaseRepository
+import datetime as dt
+from sqlalchemy import select
 
-from admin.db.tables import SensorData
+from .base import BaseRepository
+from admin.db.tables import SensorData, Sensor
 
 
 class SensorDataRepository(BaseRepository):
@@ -26,4 +28,23 @@ class SensorDataRepository(BaseRepository):
     async def get_creator_id(self, sensor_data_id: int) -> int | None:
         query = select(SensorData.creator_id).filter_by(id=room_id)
         return await self.session.scalar(query)
+
+    async def get_room_statistic(
+            self,
+            room_id: int,
+            from_datetime: dt.datetime | None = None,
+            to_datetime: dt.datetime | None = None
+    ) -> dict[dt.datetime, SensorData]:
+        query = self._room_statistic_query(room_id, from_datetime, to_datetime)
+        return list(await self.session.scalars(query))
+
+    @staticmethod
+    def _room_statistic_query(room_id, from_datetime, to_datetime):
+        query = select(SensorData).filter(SensorData.sensor.has(Sensor.room_id == room_id))
+        query = query.order_by(SensorData.created_at)
+        if from_datetime is not None:
+            query = query.filter(SensorData.created_at >= from_datetime)
+        if to_datetime is not None:
+            query = query.filter(SensorData.created_at <= to_datetime)
+        return query
 

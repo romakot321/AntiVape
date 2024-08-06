@@ -15,6 +15,7 @@ router = APIRouter(prefix="/api/sensor", tags=["Sensor"])
 
 @router.get('', response_model=list[SensorShortSchema])
 async def get_sensors(filters: SensorFiltersSchema = Depends(), service: SensorService = Depends()):
+    """Get list on sensors for room_id, or search sensor by guid"""
     return await service.get_many(filters)
 
 
