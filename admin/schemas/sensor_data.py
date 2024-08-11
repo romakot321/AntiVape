@@ -12,8 +12,15 @@ class SensorDataSchema(BaseModel):
 
     @classmethod
     def from_redis(cls, key, value):
+        if not isinstance(key, str) or not isinstance(value, str):
+            return
+        if ':' not in key:
+            return
         sensor_guid, timestamp = key.split(':')
-        data = json.loads(value)
+        try:
+            data = json.loads(value)
+        except json.decoder.JSONDecodeError:
+            return
         return cls(
             sensor_guid=sensor_guid,
             created_at=dt.datetime.fromtimestamp(float(timestamp)),

@@ -10,7 +10,6 @@ class Settings(BaseSettings):
     postgres_db: str = 'db'
     postgres_password: str = 'password'
     postgres_user: str = 'postgres'
-    redis_host: str = '127.0.0.1'
 
 
 settings = Settings()

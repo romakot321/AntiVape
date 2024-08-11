@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from fastapi import Depends, Request
+from fastapi import Depends, Request, HTTPException
 from fastapi_users import BaseUserManager, IntegerIDMixin
 from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import (
@@ -13,14 +13,53 @@ from fastapi_users.authentication import (
     BearerTransport,
     JWTStrategy,
 )
+from fastapi_users.password import PasswordHelper
 from fastapi_users.db import SQLAlchemyUserDatabase
 
 from admin.db.tables import User
 from admin.db.base import get_session
+from admin.repositories.user import UserRepository
+from admin.repositories.auth import AuthRepository
+from admin.services.email import send_forgot_password_mail
+from admin.schemas.auth import AuthPasswordRestoreSchema
 
 SECRET = "SECRET"
 
 bearer_transport = BearerTransport(tokenUrl="/api/auth/login")
+
+
+class AuthService:
+    def __init__(
+            self,
+            user_repository: UserRepository = Depends(),
+            auth_repository: AuthRepository = Depends()
+    ):
+        self.user_repository = user_repository
+        self.auth_repository = auth_repository
+        self.password_helper = PasswordHelper()
+
+    def _hash_password(self, password: str) -> str:
+        return self.password_helper.hash(password)
+
+    async def _request_password_restore(self, user_email: str):
+        if (await self.user_repository.get_one(user_email=user_email, mute_not_found_exception=True)) is None:
+            return
+        code = await self.auth_repository.generate_restore_code(user_email)
+        await send_forgot_password_mail(user_email, code)
+
+    async def _restore_password(self, restore_code: str, user_email: str, new_password: str):
+        if not (await self.auth_repository.validate_restore_code(user_email, restore_code)):
+            raise HTTPException(400)
+        user = await self.user_repository.get_one(user_email=user_email)
+        hashed_password = self._hash_password(new_password)
+        await self.user_repository.update(user.id, hashed_password=hashed_password)
+        await self.auth_repository.delete_restore_code(restore_code)
+
+    async def process_restore_request(self, schema: AuthPasswordRestoreSchema):
+        if schema.restore_code is None:
+            await self._request_password_restore(schema.email)
+        elif schema.new_password is not None:
+            await self._restore_password(schema.restore_code, schema.email, schema.new_password)
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):

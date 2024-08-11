@@ -10,10 +10,11 @@ class AdminAPIService:
 
     async def _pop_sensors_data(self) -> list[SensorDataSchema]:
         rows = await self.sensor_repository.pop_all()
-        return [
+        schemas = [
             SensorDataSchema.from_redis(key=row[0].decode(), value=row[1].decode())
             for row in rows
         ]
+        return list(filter(lambda i: i is not None, schemas))  # Delete invalid data
 
     async def _store_in_admin(self, *sensors_data_schemas: list[SensorDataSchema]):
         await AdminController.store_sensors_data(*sensors_data_schemas)

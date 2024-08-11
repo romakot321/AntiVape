@@ -1,6 +1,6 @@
 import uuid
-
 from fastapi_users import schemas
+from pydantic import BaseModel
 
 
 class AuthUserReadSchema(schemas.BaseUser[int]):
@@ -13,4 +13,10 @@ class AuthUserCreateSchema(schemas.BaseUserCreate):
 
 class AuthUserUpdateSchema(schemas.BaseUserUpdate):
     pass
+
+
+class AuthPasswordRestoreSchema(BaseModel):
+    email: str
+    restore_code: str | None = None
+    new_password: str | None = None
 

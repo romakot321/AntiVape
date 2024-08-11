@@ -1,18 +1,33 @@
 version: '3'
 
 services:
+  app:
+    build:
+      context: ./
+    container_name: antivape_app
+    ports:
+      - "8000:80"
+    depends_on:
+      - redis
+      - postgres
+    env_file:
+      - .env
+    restart: always
+    networks:
+      default:
+
   redis:
     image: redis:alpine
+    container_name: antivape_redis
     restart: always
-    ports:
-      - '6379:6379'
+    networks:
+      default:
 
   postgres:
     image: postgres:16.2
+    container_name: antivape_db
     restart: always
     env_file:
       - .env
     networks:
       default:
-    ports:
-      - '5432:5432'
