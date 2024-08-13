@@ -57,7 +57,7 @@ def init_web_application():
 
     from sensor.main import init_web_application as init_sensor_app
 
-    application.mount('/sensor', init_sensor_app(application))
+    application.mount('/api/external', init_sensor_app(application))
 
     return application
 
