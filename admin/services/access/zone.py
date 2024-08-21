@@ -24,6 +24,8 @@ class ZoneAccessService:
     async def filter_get_many_response(
             self, zones: list[Zone]
     ) -> list[Zone]:
+        if self.current_user.is_superuser:
+            return zones
         for i in range(len(zones)):
             if zones[i].creator_id != self.current_user.id:
                 zones[i] = None
@@ -35,6 +37,8 @@ class ZoneAccessService:
                 zone_id: int,
                 self: ZoneAccessService = Depends(cls)
         ):
+            if self.current_user.is_superuser:
+                return
             zone_creator_id = await self.zone_repository.get_creator_id(zone_id=zone_id)
             if zone_creator_id != self.current_user.id:
                 raise AuthException()
@@ -47,6 +51,8 @@ class ZoneAccessService:
                 zone_id: int,
                 self: ZoneAccessService = Depends(cls)
         ):
+            if self.current_user.is_superuser:
+                return
             zone_creator_id = await self.zone_repository.get_creator_id(zone_id)
             if zone_creator_id != self.current_user.id:
                 raise AuthException()
@@ -59,6 +65,8 @@ class ZoneAccessService:
                 zone_id: int,
                 self: ZoneAccessService = Depends(cls)
         ):
+            if self.current_user.is_superuser:
+                return
             zone_creator_id = await self.zone_repository.get_creator_id(zone_id)
             if zone_creator_id != self.current_user.id:
                 raise AuthException()

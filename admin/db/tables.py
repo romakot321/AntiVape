@@ -17,6 +17,8 @@ from sqlalchemy.orm import mapped_column as column
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.expression import false
+from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.associationproxy import AssociationProxy
 
 from admin.db.base import Base
 
@@ -58,6 +60,8 @@ class Sensor(OwnableObjectMixin, Base):
 
     room: M['Room'] = relationship(back_populates="sensors", lazy='selectin', cascade='all, delete')
     data: M[list['SensorData']] = relationship(back_populates="sensor", lazy='selectin')
+    zone: AssociationProxy['Zone'] = association_proxy("room", "zone")
+    zone_id: AssociationProxy[int] = association_proxy("room", "zone_id")
 
 
 class SensorData(BaseMixin, Base):

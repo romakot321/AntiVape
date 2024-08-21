@@ -26,6 +26,8 @@ class SensorAccessService:
     async def filter_get_many_response(
             self, sensors: list[Sensor]
     ) -> list[Sensor]:
+        if self.current_user.is_superuser:
+            return sensors
         for i in range(len(sensors)):
             if sensors[i].creator_id != self.current_user.id:
                 sensors[i] = None
@@ -37,6 +39,8 @@ class SensorAccessService:
                 schema: SensorCreateSchema,
                 self: SensorAccessService = Depends(cls)
         ):
+            if self.current_user.is_superuser:
+                return
             room_creator_id = await self.room_repository.get_creator_id(schema.room_id)
             if room_creator_id != self.current_user.id:
                 raise AuthException()
@@ -49,6 +53,8 @@ class SensorAccessService:
                 id_or_guid: str,
                 self: SensorAccessService = Depends(cls)
         ):
+            if self.current_user.is_superuser:
+                return
             sensor_guid, sensor_id = None, None
             if id_or_guid.isnumeric():
                 sensor_id = int(id_or_guid)
@@ -66,6 +72,8 @@ class SensorAccessService:
                 sensor_id: int,
                 self: SensorAccessService = Depends(cls)
         ):
+            if self.current_user.is_superuser:
+                return
             sensor_creator_id = await self.sensor_repository.get_creator_id(sensor_id)
             if sensor_creator_id != self.current_user.id:
                 raise AuthException()

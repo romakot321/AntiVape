@@ -38,6 +38,24 @@ class SensorDataRepository(BaseRepository):
         query = self._room_statistic_query(room_id, from_datetime, to_datetime)
         return list(await self.session.scalars(query))
 
+    async def get_room_statistic(
+            self,
+            room_id: int,
+            from_datetime: dt.datetime | None = None,
+            to_datetime: dt.datetime | None = None
+    ) -> list[SensorData]:
+        query = self._room_statistic_query(room_id, from_datetime, to_datetime)
+        return list(await self.session.scalars(query))
+
+    async def get_zone_statistic(
+            self,
+            zone_id: int,
+            from_datetime: dt.datetime | None = None,
+            to_datetime: dt.datetime | None = None
+    ) -> list[SensorData]:
+        query = self._zone_statistic_query(zone_id, from_datetime, to_datetime)
+        return list(await self.session.scalars(query))
+
     @staticmethod
     def _room_statistic_query(room_id, from_datetime, to_datetime):
         query = select(SensorData).filter(SensorData.sensor.has(Sensor.room_id == room_id))
@@ -46,5 +64,16 @@ class SensorDataRepository(BaseRepository):
             query = query.filter(SensorData.created_at >= from_datetime)
         if to_datetime is not None:
             query = query.filter(SensorData.created_at <= to_datetime)
+        return query
+
+    @classmethod
+    def _zone_statistic_query(cls, zone_id, from_datetime, to_datetime):
+        query = select(SensorData).filter(SensorData.sensor.has(Sensor.zone_id == zone_id))
+        query = query.order_by(SensorData.created_at)
+        if from_datetime is not None:
+            query = query.filter(SensorData.created_at >= from_datetime)
+        if to_datetime is not None:
+            query = query.filter(SensorData.created_at <= to_datetime)
+        query = cls._query_select_in_load(query, [SensorData.sensor])
         return query
 

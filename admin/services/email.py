@@ -16,10 +16,10 @@ settings = MailSettings()
 templates_folder = Path(os.path.dirname(__file__)) / '../assets'
 
 
-def load_forgot_password_template(new_password):
+def _load_forgot_password_template(restore_code):
     with open(templates_folder / 'forgot_password_email.html') as f:
         text = f.read()
-    return text.format(new_password=new_password)
+    return text.format(restore_code=restore_code)
 
 
 async def _send_email(client, recipient_email: str, message: str):
@@ -30,7 +30,7 @@ async def _send_email(client, recipient_email: str, message: str):
         logger.error(str(e))
 
 
-async def send_forgot_password_mail(recipient_email: str, new_password: str):
+async def send_forgot_password_mail(recipient_email: str, restore_code: str):
     smtp_client = SMTP(
         hostname=settings.mail_server,
         port=settings.mail_port,
@@ -38,6 +38,6 @@ async def send_forgot_password_mail(recipient_email: str, new_password: str):
         username=settings.mail_username,
         password=settings.mail_password
     )
-    message = load_forgot_password_template(new_password)
+    message = _load_forgot_password_template(restore_code)
     await _send_email(smtp_client, recipient_email, message)
 

@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, Response
 
 from admin.db.tables import User
 from admin.schemas.auth import AuthUserCreateSchema, AuthUserReadSchema, AuthUserUpdateSchema
@@ -29,7 +29,18 @@ async def get_user_by_token(user: User = Depends(get_current_user)):
     return user
 
 
-@router.put('/restore', status_code=202)
-async def request_password_restore(schema: AuthPasswordRestoreSchema, service: AuthService = Depends()):
-    await service.process_restore_request(schema)
+@router.put(
+    '/restore',
+    description="""
+    email only = send restore code to email.
+    email + restore_code = validate restore code.
+    email + restore_code + new_password = set new password.
+    """
+)
+async def request_password_restore(
+        schema: AuthPasswordRestoreSchema,
+        response: Response,
+        service: AuthService = Depends()
+):
+    await service.process_restore_request(schema, response)
 

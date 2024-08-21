@@ -1,14 +1,18 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, WebSocket
+from fastapi import WebSocketDisconnect
+import asyncio
 
 from admin.schemas.zone import ZoneShortSchema
 from admin.schemas.zone import ZoneGetSchema
 from admin.schemas.zone import ZoneCreateSchema
 from admin.schemas.zone import ZoneUpdateSchema
 from admin.schemas.zone import ZoneFiltersSchema
-from admin.services.zone import ZoneService
+from admin.schemas.zone import ZoneStatisticsFiltersSchema
+from admin.schemas.zone import ZoneStatisticsGetSchema
+from admin.services.zone import ZoneService, WebsocketZoneService
 from admin.services.access import ZoneAccessService
 from admin.db.tables import User
-from admin.dependencies import get_current_user
+from admin.dependencies import get_current_user, get_current_user_websocket
 
 router = APIRouter(prefix="/api/zone", tags=["Zone"])
 
@@ -60,4 +64,24 @@ async def update_zone(
 )
 async def delete_zone(zone_id: int, service: ZoneService = Depends()):
     await service.delete(zone_id)
+
+
+@router.get(
+    '/{zone_id}/statistics',
+    response_model=ZoneStatisticsGetSchema,
+    dependencies=[ZoneAccessService.validate_get_one()]
+)
+async def get_zone_statistics(zone_id: int, filters: ZoneStatisticsFiltersSchema = Depends(), service: ZoneService = Depends()):
+    return await service.get_sensors_statistics(zone_id, filters)
+
+
+@router.websocket('/stream')
+async def stream_zone_statistics(websocket: WebSocket, service: WebsocketZoneService = Depends()):
+    await websocket.accept()
+    async for statistics in service.stream_zones_sensors_statistics():
+        try:
+            await websocket.send_json(statistics.model_dump_json())
+        except WebSocketDisconnect:
+            break
+        await asyncio.sleep(30)
 

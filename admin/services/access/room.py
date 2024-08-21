@@ -26,6 +26,8 @@ class RoomAccessService:
     async def filter_get_many_response(
             self, rooms: list[Room]
     ) -> list[Room]:
+        if self.current_user.is_superuser:
+            return rooms
         for i in range(len(rooms)):
             if rooms[i].creator_id != self.current_user.id:
                 rooms[i] = None
@@ -37,6 +39,8 @@ class RoomAccessService:
                 room_id: int,
                 self: RoomAccessService = Depends(cls)
         ):
+            if self.current_user.is_superuser:
+                return
             room_creator_id = await self.room_repository.get_creator_id(room_id)
             if room_creator_id != self.current_user.id:
                 raise AuthException()
@@ -49,6 +53,8 @@ class RoomAccessService:
                 schema: RoomCreateSchema,
                 self: RoomAccessService = Depends(cls)
         ):
+            if self.current_user.is_superuser:
+                return
             zone_creator_id = await self.zone_repository.get_creator_id(schema.zone_id)
             if zone_creator_id != self.current_user.id:
                 raise AuthException()

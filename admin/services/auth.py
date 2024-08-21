@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from fastapi import Depends, Request, HTTPException
+from fastapi import Depends, Request, HTTPException, Response
 from fastapi_users import BaseUserManager, IntegerIDMixin
 from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import (
@@ -44,7 +44,7 @@ class AuthService:
     async def _request_password_restore(self, user_email: str):
         if (await self.user_repository.get_one(user_email=user_email, mute_not_found_exception=True)) is None:
             return
-        code = await self.auth_repository.generate_restore_code(user_email)
+        code = await self.auth_repository.create_restore_code(user_email)
         await send_forgot_password_mail(user_email, code)
 
     async def _restore_password(self, restore_code: str, user_email: str, new_password: str):
@@ -55,11 +55,20 @@ class AuthService:
         await self.user_repository.update(user.id, hashed_password=hashed_password)
         await self.auth_repository.delete_restore_code(restore_code)
 
-    async def process_restore_request(self, schema: AuthPasswordRestoreSchema):
+    async def _validate_restore_code(self, user_email, restore_code):
+        if not (await self.auth_repository.validate_restore_code(user_email, restore_code)):
+            raise HTTPException(400)
+
+    async def process_restore_request(self, schema: AuthPasswordRestoreSchema, response: Response):
         if schema.restore_code is None:
             await self._request_password_restore(schema.email)
+            response.status_code = 202
+        elif schema.new_password is None:
+            await self._validate_restore_code(schema.email, schema.restore_code)
+            response.status_code = 200
         elif schema.new_password is not None:
             await self._restore_password(schema.restore_code, schema.email, schema.new_password)
+            response.status_code = 204
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
@@ -79,7 +88,7 @@ async def _get_user_db(session: AsyncSession = Depends(get_session)):
     yield _AuthUserModel(session, User)
 
 
-async def _get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(_get_user_db)):
+async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(_get_user_db)):
     yield UserManager(user_db)
 
 
@@ -89,4 +98,4 @@ auth_backend = AuthenticationBackend(
     get_strategy=get_jwt_strategy,
 )
 
-fastapi_users = FastAPIUsers[User, int](_get_user_manager, [auth_backend])
+fastapi_users = FastAPIUsers[User, int](get_user_manager, [auth_backend])

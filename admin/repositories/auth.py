@@ -33,7 +33,7 @@ class AuthRepository:
             pass
         return code
 
-    async def generate_restore_code(self, user_email: str) -> str:
+    async def create_restore_code(self, user_email: str) -> str:
         code = await self._generate_restore_code()
         await self._save_redis(code, user_email, self.RESTORE_CODE_LIFETIME)
 

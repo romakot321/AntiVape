@@ -12,8 +12,19 @@ class SensorUpdateSchema(BaseModel):
     room_id: int | None = None
 
 
+class SensorRoomZoneSchema(BaseModel):
+    id: int
+    name: str
+
+
+class SensorRoomSchema(BaseModel):
+    id: int
+    name: str
+    zone: SensorRoomZoneSchema
+
+
 class SensorGetSchema(BaseModel):
-    room_id: int | None
+    room: SensorRoomSchema | None = None
     guid: str
     id: int
 
