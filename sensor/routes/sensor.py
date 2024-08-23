@@ -4,7 +4,7 @@ from sensor.dependencies import validate_token
 from sensor.schemas.sensor import SensorDataSchema
 from sensor.services.admin import AdminAPIService
 
-router = APIRouter(prefix="/data", tags=["Sensor"])
+router = APIRouter(prefix="/sensors_data", tags=["Sensor"])
 
 
 @router.post('')
