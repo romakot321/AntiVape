@@ -22,6 +22,10 @@ router.include_router(
 router.include_router(
     fastapi_users.get_register_router(AuthUserReadSchema, AuthUserCreateSchema),
 )
+router.include_router(
+    fastapi_users.get_users_router(AuthUserReadSchema, AuthUserUpdateSchema),
+    prefix="/user"
+)
 
 
 @router.get("/me", response_model=AuthUserReadSchema)

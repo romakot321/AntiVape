@@ -52,6 +52,7 @@ class OwnableObjectMixin(BaseMixin):
 class User(SQLAlchemyBaseUserTable[int], Base):
     __tablename__ = 'users'
     id: M[int] = column(primary_key=True, index=True)
+    name: M[str | None] = column(nullable=True)
 
 
 class Sensor(OwnableObjectMixin, Base):

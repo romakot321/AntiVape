@@ -4,15 +4,14 @@ from pydantic import BaseModel
 
 
 class AuthUserReadSchema(schemas.BaseUser[int]):
-    pass
-
+    name: str | None = None
 
 class AuthUserCreateSchema(schemas.BaseUserCreate):
-    pass
+    name: str | None = None
 
 
 class AuthUserUpdateSchema(schemas.BaseUserUpdate):
-    pass
+    name: str | None = None
 
 
 class AuthPasswordRestoreSchema(BaseModel):
