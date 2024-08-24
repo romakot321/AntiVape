@@ -49,11 +49,13 @@ def init_web_application():
     from admin.routes.room import router as room_router
     from admin.routes.zone import router as zone_router
     from admin.routes.auth import router as auth_router
+    from admin.routes.user import router as user_router
 
     application.include_router(auth_router)
     application.include_router(zone_router)
     application.include_router(room_router)
     application.include_router(sensor_router)
+    application.include_router(user_router)
 
     from sensor.main import init_web_application as init_sensor_app
 

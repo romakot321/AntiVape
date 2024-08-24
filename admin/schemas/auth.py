@@ -6,6 +6,7 @@ from pydantic import BaseModel
 class AuthUserReadSchema(schemas.BaseUser[int]):
     name: str | None = None
 
+
 class AuthUserCreateSchema(schemas.BaseUserCreate):
     name: str | None = None
 

@@ -9,6 +9,7 @@ from admin.services.auth import auth_backend, get_jwt_strategy
 
 _strategy = get_jwt_strategy()
 get_current_user = fastapi_users.current_user(active=True)
+get_current_superuser = fastapi_users.current_user(active=True, superuser=True)
 
 
 async def get_current_user_websocket(
