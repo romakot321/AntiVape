@@ -18,8 +18,8 @@ class SensorService:
         self.repository = repository
         self.access_service = access_service
 
-    async def create(self, schema: SensorCreateSchema, creator_id: int) -> SensorShortSchema:
-        model = Sensor(creator_id=creator_id, **schema.model_dump())
+    async def create(self, schema: SensorCreateSchema) -> SensorShortSchema:
+        model = Sensor(**schema.model_dump())
         model = await self.repository.create(model)
         return SensorShortSchema.model_validate(model)
 

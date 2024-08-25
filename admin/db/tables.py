@@ -37,16 +37,16 @@ class BaseMixin:
 
 
 class OwnableObjectMixin(BaseMixin):
-    creator_id: M[int] = column(ForeignKey('users.id'))  # aka owner
+    owner_id: M[int] = column(ForeignKey('users.id'))  # aka owner
     editor_id: M[int | None] = column(ForeignKey('users.id'), nullable=True)
 
     @declared_attr
     def creator(cls) -> M['User']:
-        return relationship("User", foreign_keys=[cls.creator_id], lazy='selectin')
+        return relationship("User", foreign_keys=[cls.owner_id], lazy='noload')
 
     @declared_attr
     def editor(cls) -> M['User']:
-        return relationship("User", foreign_keys=[cls.editor_id], lazy='selectin')
+        return relationship("User", foreign_keys=[cls.editor_id], lazy='noload')
 
 
 class User(SQLAlchemyBaseUserTable[int], Base):
@@ -59,8 +59,8 @@ class Sensor(OwnableObjectMixin, Base):
     guid: M[str] = column(index=True, unique=True)
     room_id: M[int | None] = column(ForeignKey('rooms.id'), nullable=True)
 
-    room: M['Room'] = relationship(back_populates="sensors", lazy='selectin', cascade='all, delete')
-    data: M[list['SensorData']] = relationship(back_populates="sensor", lazy='selectin')
+    room: M['Room'] = relationship(back_populates="sensors", lazy='noload', cascade='all, delete')
+    data: M[list['SensorData']] = relationship(back_populates="sensor", lazy='noload', cascade='all, delete')
     zone: AssociationProxy['Zone'] = association_proxy("room", "zone")
     zone_id: AssociationProxy[int] = association_proxy("room", "zone_id")
 
@@ -71,19 +71,19 @@ class SensorData(BaseMixin, Base):
     battery_charge: M[int]
     sensor_guid: M[str] = column(ForeignKey('sensors.guid'))
 
-    sensor: M['Sensor'] = relationship(back_populates='data', lazy='selectin', cascade='all, delete')
+    sensor: M['Sensor'] = relationship(back_populates='data', lazy='noload', cascade='all, delete')
 
 
 class Room(OwnableObjectMixin, Base):
     name: M[str]
     zone_id: M[int] = column(ForeignKey('zones.id'))
 
-    zone: M['Zone'] = relationship(back_populates="rooms", lazy='selectin', cascade='all, delete')
-    sensors: M[list['Sensor']] = relationship(back_populates='room', lazy='selectin')
+    zone: M['Zone'] = relationship(back_populates="rooms", lazy='noload', cascade='all, delete')
+    sensors: M[list['Sensor']] = relationship(back_populates='room', lazy='noload', cascade='all, delete')
 
 
 class Zone(OwnableObjectMixin, Base):
     name: M[str]
 
-    rooms: M[list['Room']] = relationship(back_populates='zone', lazy='selectin')
+    rooms: M[list['Room']] = relationship(back_populates='zone', lazy='noload', cascade='all, delete')
 

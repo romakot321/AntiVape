@@ -29,40 +29,47 @@ class RoomAccessService:
         if self.current_user.is_superuser:
             return rooms
         for i in range(len(rooms)):
-            if rooms[i].creator_id != self.current_user.id:
+            if rooms[i].owner_id != self.current_user.id:
                 rooms[i] = None
         return list(filter(lambda i: i is not None, rooms))
 
     @classmethod
-    def _get_base_validator(cls):
+    def validate_get_one(cls):
         async def validator(
                 room_id: int,
                 self: RoomAccessService = Depends(cls)
         ):
             if self.current_user.is_superuser:
                 return
-            room_creator_id = await self.room_repository.get_creator_id(room_id)
-            if room_creator_id != self.current_user.id:
+            room_owner_id = await self.room_repository.get_owner_id(room_id)
+            if room_owner_id != self.current_user.id:
+                raise AuthException()
+
+        return Depends(validator)
+
+    @classmethod
+    def validate_get_many(cls):
+        async def validator(
+                filters: RoomFiltersSchema = Depends(),
+                self: RoomAccessService = Depends(cls)
+        ):
+            if filters.owner_id is not None and not self.current_user.is_superuser:
+                raise AuthException()
+
+        return Depends(validator)
+
+    @classmethod
+    def _get_base_validator(cls):
+        async def validator(
+                self: RoomAccessService = Depends(cls)
+        ):
+            if not self.current_user.is_superuser:
                 raise AuthException()
 
         return Depends(validator)
 
     @classmethod
     def validate_create(cls):
-        async def validator(
-                schema: RoomCreateSchema,
-                self: RoomAccessService = Depends(cls)
-        ):
-            if self.current_user.is_superuser:
-                return
-            zone_creator_id = await self.zone_repository.get_creator_id(schema.zone_id)
-            if zone_creator_id != self.current_user.id:
-                raise AuthException()
-
-        return Depends(validator)
-
-    @classmethod
-    def validate_get_one(cls):
         return cls._get_base_validator()
 
     @classmethod
@@ -72,5 +79,4 @@ class RoomAccessService:
     @classmethod
     def validate_delete(cls):
         return cls._get_base_validator()
-
 

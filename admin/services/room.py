@@ -21,8 +21,8 @@ class RoomService:
         self.access_service = access_service
         self.sensor_data_repository = sensor_data_repository
 
-    async def create(self, schema: RoomCreateSchema, creator_id: int) -> RoomShortSchema:
-        model = Room(creator_id=creator_id, **schema.model_dump())
+    async def create(self, schema: RoomCreateSchema) -> RoomShortSchema:
+        model = Room(**schema.model_dump())
         model = await self.repository.create(model)
         return RoomShortSchema.model_validate(model)
 

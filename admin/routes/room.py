@@ -15,7 +15,11 @@ from admin.dependencies import get_current_user
 router = APIRouter(prefix="/api/room", tags=["Room"])
 
 
-@router.get('', response_model=list[RoomShortSchema])
+@router.get(
+    '',
+    response_model=list[RoomShortSchema],
+    dependencies=[RoomAccessService.validate_get_many()]
+)
 async def get_rooms(filters: RoomFiltersSchema = Depends(), service: RoomService = Depends()):
     return await service.get_many(filters)
 
@@ -51,9 +55,8 @@ async def get_room_statistic(
 async def create_room(
         schema: RoomCreateSchema,
         service: RoomService = Depends(),
-        user: User = Depends(get_current_user)
 ):
-    return await service.create(schema, creator_id=user.id)
+    return await service.create(schema)
 
 
 @router.patch(

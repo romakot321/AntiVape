@@ -28,8 +28,8 @@ class UserRepository(BaseRepository):
     async def delete(self, user_id: int) -> None:
         await self._delete(user_id)
 
-    async def get_creator_id(self, user_id: int) -> int | None:
-        query = select(User.creator_id).filter_by(id=user_id)
+    async def get_owner_id(self, user_id: int) -> int | None:
+        query = select(User.owner_id).filter_by(id=user_id)
         return await self.session.scalar(query)
 
 

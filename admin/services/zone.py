@@ -29,8 +29,8 @@ class ZoneService:
 
         self._statistics_cache = {}
 
-    async def create(self, schema: ZoneCreateSchema, creator_id: int) -> ZoneShortSchema:
-        model = Zone(creator_id=creator_id, **schema.model_dump())
+    async def create(self, schema: ZoneCreateSchema) -> ZoneShortSchema:
+        model = Zone(**schema.model_dump())
         model = await self.repository.create(model)
         return ZoneShortSchema.model_validate(model)
 

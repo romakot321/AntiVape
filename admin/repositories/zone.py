@@ -23,8 +23,8 @@ class ZoneRepository(BaseRepository):
     async def delete(self, zone_id: int) -> None:
         await self._delete(zone_id)
 
-    async def get_creator_id(self, zone_id: int) -> int | None:
-        query = select(Zone.creator_id).filter_by(id=zone_id)
+    async def get_owner_id(self, zone_id: int) -> int | None:
+        query = select(Zone.owner_id).filter_by(id=zone_id)
         return await self.session.scalar(query)
 
 

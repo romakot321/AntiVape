@@ -42,9 +42,8 @@ async def get_sensor(id_or_guid: str, service: SensorService = Depends()):
 async def create_sensor(
         schema: SensorCreateSchema,
         service: SensorService = Depends(),
-        user: User = Depends(get_current_user)
 ):
-    return await service.create(schema, creator_id=user.id)
+    return await service.create(schema)
 
 
 @router.patch(

@@ -24,7 +24,7 @@ class RoomRepository(BaseRepository):
     async def delete(self, room_id: int) -> None:
         await self._delete(room_id)
 
-    async def get_creator_id(self, room_id: int) -> int | None:
-        query = select(Room.creator_id).filter_by(id=room_id)
+    async def get_owner_id(self, room_id: int) -> int | None:
+        query = select(Room.owner_id).filter_by(id=room_id)
         return await self.session.scalar(query)
 

@@ -10,6 +10,7 @@ from .base import BaseFiltersSchema
 
 class ZoneGetSchema(BaseModel):
     id: int
+    owner_id: int
     name: str
     rooms: list[RoomShortSchema]
     active_sensors_count: int
@@ -19,10 +20,12 @@ class ZoneGetSchema(BaseModel):
 
 class ZoneCreateSchema(BaseModel):
     name: str
+    owner_id: int
 
 
 class ZoneShortSchema(BaseModel):
     id: int
+    owner_id: int
     name: str
 
     model_config = ConfigDict(from_attributes=True)
@@ -30,6 +33,7 @@ class ZoneShortSchema(BaseModel):
 
 class ZoneFiltersSchema(BaseFiltersSchema):
     name: str | None = None
+    owner_id: int | None = None
 
 
 class ZoneUpdateSchema(BaseModel):
@@ -64,8 +68,8 @@ class ZoneStatisticsGetSchema(BaseModel):
         schemas = []
         for room_id, sensor_datas in groupby(data['data'], key=operator.attrgetter('sensor.room_id')):
             sensor_datas = list(sensor_datas)
-            co2 = sum(map(lambda i: i.co2, sensor_datas)) / len(sensor_datas)
-            tvoc = sum(map(lambda i: i.tvoc, sensor_datas)) / len(sensor_datas)
+            co2 = round(sum(map(lambda i: i.co2, sensor_datas)) / len(sensor_datas), 0)
+            tvoc = round(sum(map(lambda i: i.tvoc, sensor_datas)) / len(sensor_datas), 0)
             schemas.append(ZoneRoomSensorDataSchema(co2=co2, tvoc=tvoc, room_id=room_id))
         data['data'] = schemas
         return data

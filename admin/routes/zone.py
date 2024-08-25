@@ -17,7 +17,11 @@ from admin.dependencies import get_current_user, get_current_user_websocket
 router = APIRouter(prefix="/api/zone", tags=["Zone"])
 
 
-@router.get('', response_model=list[ZoneShortSchema])
+@router.get(
+    '',
+    response_model=list[ZoneShortSchema],
+    dependencies=[ZoneAccessService.validate_get_many()]
+)
 async def get_zones(filters: ZoneFiltersSchema = Depends(), service: ZoneService = Depends()):
     return await service.get_many(filters)
 
@@ -34,14 +38,14 @@ async def get_zone(zone_id: int, service: ZoneService = Depends()):
 @router.post(
     '',
     response_model=ZoneShortSchema,
-    status_code=201
+    status_code=201,
+    dependencies=[ZoneAccessService.validate_create()]
 )
 async def create_zone(
         schema: ZoneCreateSchema,
         service: ZoneService = Depends(),
-        user: User = Depends(get_current_user)
 ):
-    return await service.create(schema, creator_id=user.id)
+    return await service.create(schema)
 
 
 @router.patch(

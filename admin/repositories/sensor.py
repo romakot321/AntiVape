@@ -41,27 +41,19 @@ class SensorRepository(BaseRepository):
     async def delete(self, sensor_id: int) -> None:
         await self._delete(sensor_id)
 
-    async def get_creator_id(self, sensor_id: int | None = None, sensor_guid: str | None = None) -> int | None:
+    async def get_owner_id(self, sensor_id: int | None = None, sensor_guid: str | None = None) -> int | None:
         filters = {k: v for k, v in (('id', sensor_id), ('guid', sensor_guid)) if v is not None}
-        query = select(Sensor.creator_id).filter_by(**filters)
+        query = select(Sensor.owner_id).filter_by(**filters)
         return await self.session.scalar(query)
 
-    async def count_sensors(self, zone_id: int | None = None, room_id: int | None = None, active: bool = False) -> int:
+    async def count_sensors(self, zone_id: int | None = None, room_id: int | None = None) -> int:
         query = select(func.count(Sensor.id))
         if zone_id is not None:
             query = query.filter(Sensor.zone.has(id=zone_id))
         if room_id is not None:
             query = query.filter(Sensor.room_id == room_id)
-        if active:
-            query = query.filter(self._check_sensor_active_query())
         return await self.session.scalar(query)
 
-    @staticmethod
-    def _check_sensor_active_query():
-        max_old_time = dt.datetime.now() - dt.timedelta(minutes=60)
-        return exists(
-            select(SensorData)
-                .filter(SensorData.created_at > max_old_time)
-                .filter(SensorData.sensor_guid == Sensor.guid)
-        )
+    async def count_active_sensors(self, redis_connection, user_id: int):
+        pass
 

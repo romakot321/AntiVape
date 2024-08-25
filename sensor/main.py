@@ -51,7 +51,7 @@ def init_web_application(admin_app: FastAPI):
 
     application.include_router(sensor_router)
 
-    @repeat_every(seconds=60 * 30, raise_exceptions=True)
+    @repeat_every(seconds=15, raise_exceptions=True)
     async def transfer_task():
         await AdminAPIService.transfer_sensors_data()
 
