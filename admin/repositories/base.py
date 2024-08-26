@@ -154,6 +154,9 @@ class BaseRepository[Table: BaseTable]:
                 await self.session.commit()
             except exc.IntegrityError as e:
                 await self.session.rollback()
+                if 'is not present in table' in str(e.orig):
+                    message = str(e.orig).split(':  Key ')[1].strip().capitalize()
+                    raise HTTPException(status_code=404, detail=message)
                 logger.exception(e)
                 raise HTTPException(status_code=status.HTTP_409_CONFLICT)
 

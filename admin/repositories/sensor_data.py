@@ -64,8 +64,10 @@ class SensorDataRepository(BaseRepository):
         query = select(SensorData).filter(SensorData.sensor.has(Sensor.zone_id == zone_id))
         query = query.order_by(SensorData.created_at)
         if from_datetime is not None:
+            from_datetime = from_datetime.replace(tzinfo=None)
             query = query.filter(SensorData.created_at >= from_datetime)
         if to_datetime is not None:
+            to_datetime = to_datetime.replace(tzinfo=None)
             query = query.filter(SensorData.created_at <= to_datetime)
         query = cls._query_select_in_load(query, [SensorData.sensor])
         return query

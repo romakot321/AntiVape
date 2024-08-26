@@ -37,8 +37,8 @@ class BaseMixin:
 
 
 class OwnableObjectMixin(BaseMixin):
-    owner_id: M[int] = column(ForeignKey('users.id'))  # aka owner
-    editor_id: M[int | None] = column(ForeignKey('users.id'), nullable=True)
+    owner_id: M[int] = column(ForeignKey('users.id', ondelete="CASCADE"))  # aka owner
+    editor_id: M[int | None] = column(ForeignKey('users.id', ondelete="CASCADE"), nullable=True)
 
     @declared_attr
     def creator(cls) -> M['User']:
@@ -57,7 +57,7 @@ class User(SQLAlchemyBaseUserTable[int], Base):
 
 class Sensor(OwnableObjectMixin, Base):
     guid: M[str] = column(index=True, unique=True)
-    room_id: M[int | None] = column(ForeignKey('rooms.id'), nullable=True)
+    room_id: M[int | None] = column(ForeignKey('rooms.id', ondelete="CASCADE"), nullable=True)
 
     room: M['Room'] = relationship(back_populates="sensors", lazy='noload', cascade='all, delete')
     data: M[list['SensorData']] = relationship(back_populates="sensor", lazy='noload', cascade='all, delete')
@@ -69,14 +69,14 @@ class SensorData(BaseMixin, Base):
     co2: M[int]
     tvoc: M[int]
     battery_charge: M[int]
-    sensor_guid: M[str] = column(ForeignKey('sensors.guid'))
+    sensor_guid: M[str] = column(ForeignKey('sensors.guid', ondelete="CASCADE"))
 
     sensor: M['Sensor'] = relationship(back_populates='data', lazy='noload', cascade='all, delete')
 
 
 class Room(OwnableObjectMixin, Base):
     name: M[str]
-    zone_id: M[int] = column(ForeignKey('zones.id'))
+    zone_id: M[int] = column(ForeignKey('zones.id', ondelete="CASCADE"))
 
     zone: M['Zone'] = relationship(back_populates="rooms", lazy='noload', cascade='all, delete')
     sensors: M[list['Sensor']] = relationship(back_populates='room', lazy='noload', cascade='all, delete')
