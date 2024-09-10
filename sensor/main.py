@@ -51,9 +51,12 @@ def init_web_application(admin_app: FastAPI):
 
     application.include_router(sensor_router)
 
-    @repeat_every(seconds=15, raise_exceptions=True)
+    @repeat_every(seconds=15)
     async def transfer_task():
-        await AdminAPIService.transfer_sensors_data()
+        try:
+            await AdminAPIService.transfer_sensors_data()
+        except Exception as e:
+            logger.exception(e)
 
     admin_app.add_event_handler("startup", transfer_task)
 

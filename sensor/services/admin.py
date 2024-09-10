@@ -2,6 +2,7 @@ from admin.controller import AdminController
 from admin.schemas.sensor_data import SensorDataSchema
 from sensor.db.base import get_session, Redis
 from sensor.repositories.sensor import SensorRepository
+from loguru import logger
 
 
 class AdminAPIService:
@@ -13,6 +14,7 @@ class AdminAPIService:
         schemas = [
             SensorDataSchema.from_redis(key=row[0].decode(), value=row[1].decode())
             for row in rows
+            if row[0] is not None and row[1] is not None
         ]
         return list(filter(lambda i: i is not None, schemas))  # Delete invalid data
 

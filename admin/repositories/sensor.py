@@ -54,6 +54,15 @@ class SensorRepository(BaseRepository):
             query = query.filter(Sensor.room_id == room_id)
         return await self.session.scalar(query)
 
+    async def is_exists(self, sensor_id: int = None, sensor_guid: str = None) -> bool:
+        query = exists(Sensor)
+        if sensor_id is not None:
+            query = query.where(Sensor.id == sensor_id)
+        if sensor_guid is not None:
+            query = query.where(Sensor.guid == sensor_guid)
+        query = select(query)
+        return await self.session.scalar(query)
+
     async def count_active_sensors(self, redis_connection, user_id: int):
         pass
 

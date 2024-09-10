@@ -14,9 +14,9 @@ class SensorDataSchema(BaseModel):
     def from_redis(cls, key, value):
         if not isinstance(key, str) or not isinstance(value, str):
             return
-        if ':' not in key:
+        if '---' not in key:
             return
-        sensor_guid, timestamp = key.split(':')
+        sensor_guid, timestamp = key.split('---')
         try:
             data = json.loads(value)
         except json.decoder.JSONDecodeError:
