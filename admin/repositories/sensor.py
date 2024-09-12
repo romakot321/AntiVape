@@ -46,12 +46,14 @@ class SensorRepository(BaseRepository):
         query = select(Sensor.owner_id).filter_by(**filters)
         return await self.session.scalar(query)
 
-    async def count_sensors(self, zone_id: int | None = None, room_id: int | None = None) -> int:
+    async def count_sensors(self, owner_id: int | None = None, zone_id: int | None = None, room_id: int | None = None) -> int:
         query = select(func.count(Sensor.id))
         if zone_id is not None:
             query = query.filter(Sensor.zone.has(id=zone_id))
         if room_id is not None:
             query = query.filter(Sensor.room_id == room_id)
+        if owner_id is not None:
+            query = query.filter(Sensor.owner_id == owner_id)
         return await self.session.scalar(query)
 
     async def is_exists(self, sensor_id: int = None, sensor_guid: str = None) -> bool:

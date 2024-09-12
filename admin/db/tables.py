@@ -51,8 +51,19 @@ class OwnableObjectMixin(BaseMixin):
 
 class User(SQLAlchemyBaseUserTable[int], Base):
     __tablename__ = 'users'
+
     id: M[int] = column(primary_key=True, index=True)
     name: M[str | None] = column(nullable=True)
+
+    sensors: M[list['Sensor']] = relationship(
+        lazy='selectin',
+        cascade='all, delete',
+        primaryjoin="foreign(Sensor.owner_id)==User.id"
+    )
+
+    @hybrid_property
+    def sensors_count(self):
+        return len(self.sensors)
 
 
 class Sensor(OwnableObjectMixin, Base):

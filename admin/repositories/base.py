@@ -59,9 +59,10 @@ class BaseRepository[Table: BaseTable]:
             self,
             page: int = 0,
             count: int = 1000,
+            select_in_load: TableAttributesType | None = None,
             **filters
     ) -> ScalarResult[Table]:
-        query = self._get_many_query(page, count, **filters)
+        query = self._get_many_query(page, count, select_in_load=select_in_load, **filters)
         return await self.session.scalars(query)
 
     def _get_many_query(
@@ -69,6 +70,7 @@ class BaseRepository[Table: BaseTable]:
             page: int = 0,
             count: int = 1000,
             order_by: ColumnOperators | None = None,
+            select_in_load: TableAttributesType | None = None,
             **filters
     ) -> Select:
         offset = page * count
@@ -78,6 +80,8 @@ class BaseRepository[Table: BaseTable]:
             query = query.order_by(self.base_table.id.desc())
         else:
             query = query.order_by(order_by)
+        if select_in_load is not None:
+            query = self._query_select_in_load(query, select_in_load)
         query = query.offset(offset).limit(count)
         return query
 
