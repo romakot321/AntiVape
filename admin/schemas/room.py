@@ -22,11 +22,27 @@ class RoomCreateSchema(BaseModel):
     owner_id: int
 
 
+class RoomZoneSchema(BaseModel):
+    id: int
+    name: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class RoomShortSchema(BaseModel):
     id: int
     name: str
-    zone_id: int
     owner_id: int
+    zone_id: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RoomShortWithZoneSchema(BaseModel):
+    id: int
+    name: str
+    owner_id: int
+    zone: RoomZoneSchema
 
     model_config = ConfigDict(from_attributes=True)
 

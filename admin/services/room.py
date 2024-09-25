@@ -3,6 +3,7 @@ from fastapi import Depends
 from admin.schemas.room import RoomGetSchema, RoomCreateSchema
 from admin.schemas.room import RoomShortSchema, RoomFiltersSchema
 from admin.schemas.room import RoomUpdateSchema, RoomStatisticFiltersSchema
+from admin.schemas.room import RoomShortWithZoneSchema
 from admin.schemas.room import RoomStatisticGetSchema
 from admin.repositories.room import RoomRepository
 from admin.repositories.sensor_data import SensorDataRepository
@@ -30,12 +31,12 @@ class RoomService:
         model = await self.repository.get_one(room_id=room_id)
         return RoomGetSchema.model_validate(model)
 
-    async def get_many(self, filters: RoomFiltersSchema) -> list[RoomShortSchema]:
+    async def get_many(self, filters: RoomFiltersSchema) -> list[RoomShortWithZoneSchema]:
         filters = filters.model_dump(exclude_none=True)
-        models = await self.repository.get_many(**filters)
+        models = await self.repository.get_many(**filters, select_in_load=[Room.zone])
         models = await self.access_service.filter_get_many_response(models)
         return [
-            RoomShortSchema.model_validate(model)
+            RoomShortWithZoneSchema.model_validate(model)
             for model in models
         ]
 

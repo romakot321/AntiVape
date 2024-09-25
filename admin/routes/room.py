@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from admin.schemas.room import RoomShortSchema
+from admin.schemas.room import RoomShortWithZoneSchema
 from admin.schemas.room import RoomGetSchema
 from admin.schemas.room import RoomCreateSchema
 from admin.schemas.room import RoomUpdateSchema
@@ -17,7 +18,7 @@ router = APIRouter(prefix="/api/room", tags=["Room"])
 
 @router.get(
     '',
-    response_model=list[RoomShortSchema],
+    response_model=list[RoomShortWithZoneSchema],
     dependencies=[RoomAccessService.validate_get_many()]
 )
 async def get_rooms(filters: RoomFiltersSchema = Depends(), service: RoomService = Depends()):
